@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f5f7" />
+  <title>koko.okok — Make It OK.</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-ms-editor="false" data-gramm="false" data-gramm_editor="false" spellcheck="false">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">k</span><span>koko.okok</span></div>
+      <nav aria-label="Main navigation">
+        <button class="nav-item active learn-parent" data-view="learn"><span class="book-icon" aria-hidden="true"></span> Learn</button>
+        <button class="nav-item" data-view="test"><span>⌨</span> Test</button>
+        <button class="nav-item" data-view="review"><span>↻</span> Review <b id="reviewBadge">0</b></button>
+        <button class="nav-item" data-view="wordbook"><span>★</span> Wordbook <b id="wordbookBadge">0</b></button>
+        <button class="nav-item" data-view="mastered"><span>✓</span> Mastered <b id="masteredBadge">0 / 2875</b></button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="mini-progress"><span id="overallBar"></span></div>
+        <p><strong id="overallCount">0</strong> words explored</p>
+        <button id="resetButton" class="text-button">Reset learning data</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <button id="menuButton" class="icon-button menu-button" aria-label="Open menu">☰</button>
+        <div class="search-wrap"><span>⌕</span><input id="searchInput" type="search" placeholder="Search 2,904 words" aria-label="Search vocabulary" /></div>
+        <div class="streak"><span>●</span><strong id="streakCount">0</strong><span class="streak-label"> day streak</span></div>
+      </header>
+
+      <section id="learnView" class="view active">
+        <div class="hero-row">
+          <div class="hero-main"><div><p class="eyebrow hero-brand">koko.okok</p><h1>Make It OK.</h1><p class="subtitle">Read it. Hear it. Use it. Review it at the right time.</p><p id="studyCounter" class="mode-counter"></p></div><button id="chaptersShortcut" class="secondary-button chapter-shortcut" type="button"><span aria-hidden="true">▦</span> Chapters</button></div>
+          <div class="daily-ring" aria-label="Daily progress"><div><strong id="dailyCount">0</strong><span>/ 20</span><small>today</small></div></div>
+        </div>
+
+        <div class="study-layout">
+          <article class="word-card">
+            <div class="card-topline">
+              <div><span id="levelPill" class="pill">A1</span><span id="categoryText" class="category">General English</span></div>
+              <div id="learnStars" class="star-rating" aria-label="Choose how unfamiliar this word is"></div>
+            </div>
+            <div class="word-heading"><div><h2 id="wordText">Loading…</h2><p><span id="posText"></span> <span id="phoneticText"></span></p></div><button class="speak-button large" data-speak="word" aria-label="Hear the word"></button></div>
+            <div class="sense-scroll-area">
+              <div class="example-controls"><span>Example sentences</span><button id="toggleExamples" class="text-button" type="button">Hide all text</button></div>
+              <div id="senses"></div>
+            </div>
+            <div class="card-actions">
+              <button id="previousButton" class="secondary-button">← Previous</button>
+              <button id="randomButton" class="secondary-button">Surprise me</button>
+              <button id="nextButton" class="primary-button">Next word →</button>
+            </div>
+          </article>
+
+          <aside class="practice-panel">
+            <p class="eyebrow">HOW WELL DO YOU KNOW IT?</p>
+            <h3>Choose honestly.</h3>
+            <p>Your answer schedules the next review using spaced repetition.</p>
+            <div class="rating-grid">
+              <button data-rating="again"><strong>Again</strong><span>in 10 min</span></button>
+              <button data-rating="hard"><strong>Hard</strong><span>tomorrow</span></button>
+              <button data-rating="good"><strong>Good</strong><span>in 3 days</span></button>
+              <button data-rating="easy"><strong>Easy</strong><span>mastered</span></button>
+            </div>
+            <div class="tip"><span>✦</span><div><strong>Study tip</strong><p class="study-tip-copy" aria-label="Say the example aloud before you reveal your confidence."></p></div></div>
+            <div class="voice-note"><span>♫</span><div><strong>Andrew · American English</strong><p class="voice-note-copy" aria-label="Word, definition, and example audio are generated online and cached after the first play."></p></div></div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="testView" class="view" spellcheck="false">
+        <div class="test-shell">
+          <div class="test-top"><div><p class="eyebrow">LISTEN &amp; SPELL</p><h1 class="test-question" aria-label="What did you hear?"></h1></div></div>
+          <div class="test-options"><select id="testMode" aria-label="Test mode"><option value="random">Random Test</option><option value="chapter">Chapter Test</option></select><select id="testChapter" aria-label="Choose a chapter" hidden></select><span id="testCounter" class="mode-counter">1 / 20</span><button id="testRestart" class="secondary-button" type="button">New test</button></div>
+          <article class="test-card">
+            <div class="test-word-row"><button id="testReplay" class="test-replay speak-button" aria-label="Replay word and example"></button><form id="testForm"><input id="testAnswer" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type the word" aria-label="Type the word you heard" /><button class="primary-button" type="submit">Check</button></form></div>
+            <div class="test-word-tools"><div class="speed-control" aria-label="Playback speed"><button data-audio-rate="0.5" type="button">0.5×</button><button data-audio-rate="0.75" type="button">0.75×</button><button data-audio-rate="1" class="active" type="button">1×</button></div><div id="testStars" class="star-rating test-star-rating" aria-label="Choose how unfamiliar this word is"></div><label class="hint-toggle" aria-label="Show English hint"><input id="testHintToggle" type="checkbox" /><span class="hint-label" aria-hidden="true"></span></label></div>
+            <div id="testSentenceList" class="test-sentence-list"></div>
+            <div class="test-secondary-actions"><button id="testPrevious" class="test-unknown" type="button">← Previous word</button><button id="testUnknown" class="test-unknown" type="button">I don’t know — show the word</button></div>
+            <p id="testFeedback" class="test-feedback" aria-live="polite"></p>
+            <button id="testContinue" class="primary-button test-continue" type="button" hidden>Next word →</button>
+          </article>
+        </div>
+      </section>
+
+      <section id="chaptersView" class="view">
+        <div class="list-header"><div><p class="eyebrow">COURSE DIRECTORY</p><h1>Choose a chapter.</h1><p class="subtitle">Study by level and topic. Your progress is saved automatically.</p></div><button id="allWordsButton" class="secondary-button">Study all words</button></div>
+        <div id="chapterLevelTabs" class="chapter-level-tabs" aria-label="Choose a CEFR level"></div>
+        <div id="chapterGroups" class="chapter-groups"></div>
+      </section>
+
+      <section id="listView" class="view">
+        <div class="list-header"><div><p class="eyebrow" id="listEyebrow">YOUR COLLECTION</p><h1 id="listTitle">Wordbook</h1><p id="listSubtitle" class="subtitle"></p></div><select id="levelFilter" aria-label="Filter by level"><option value="all">All levels</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option></select></div>
+        <div id="wordGrid" class="word-grid"></div>
+        <div id="emptyState" class="empty-state"><span>✦</span><h2>No words here yet.</h2><p>Star a word or complete a review to build your collection.</p></div>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <aside id="lookupPopover" class="lookup-popover" aria-live="polite" aria-label="English dictionary lookup">
+    <div class="lookup-head"><div><span class="eyebrow">QUICK ENGLISH LOOKUP</span><h3 id="lookupWord"></h3></div><div class="lookup-tools"><button id="lookupSpeak" class="speak-button" aria-label="Hear selected word"></button><button id="lookupClose" class="lookup-close" aria-label="Close lookup">×</button></div></div>
+    <div id="lookupBody" class="lookup-body"></div>
+  </aside>
+  <script src="app.js?v=20260717-andrew-stream"></script>
+</body>
+</html>
