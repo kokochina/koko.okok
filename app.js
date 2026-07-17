@@ -164,7 +164,7 @@ function updateStats(){
   const records=Object.entries(state.progress).filter(([id])=>!id.startsWith('__')).map(([,record])=>record),explored=records.filter(r=>r.last).length,mastered=records.filter(r=>r.status==='mastered').length,wordbook=records.filter(r=>r.status!=='mastered'&&(r.inWordbook===true||r.stars>0)).length,due=records.filter(r=>r.status!=='mastered'&&r.due&&r.due<=Date.now()).length;
   $('overallCount').textContent=explored;$('overallBar').style.width=`${Math.min(100,explored/Math.max(1,state.words.length)*100)}%`;$('reviewBadge').textContent=due;
   $('wordbookBadge').textContent=wordbook;$('masteredBadge').textContent=`${mastered} / ${state.words.length}`;
-  const today=new Date().toDateString(),todayCount=records.filter(r=>r.last&&new Date(r.last).toDateString()===today).length;$('dailyCount').textContent=Math.min(todayCount,20);document.querySelector('.daily-ring').style.setProperty('--daily',`${Math.min(100,todayCount/20*100)}%`);
+  const today=new Date().toDateString(),todayCount=records.filter(r=>r.last&&new Date(r.last).toDateString()===today).length;$('dailyCount').textContent=todayCount;document.querySelector('.daily-ring').style.setProperty('--daily',`${Math.min(100,todayCount/20*100)}%`);
   const dates=[...new Set(records.filter(r=>r.last).map(r=>new Date(r.last).toDateString()))];let streak=0,d=new Date();while(dates.includes(d.toDateString())){streak++;d.setDate(d.getDate()-1)}$('streakCount').textContent=streak;
 }
 async function init(){
