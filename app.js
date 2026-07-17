@@ -61,6 +61,10 @@ function cleanHeadword(value){return String(value?.word??value??'').replace(/\d+
 function speakWord(value){return speak(cleanHeadword(value))}
 function andrewVoice(){const voices=speechSynthesis.getVoices();return voices.find(v=>/^Microsoft Andrew Online \(Natural\)/i.test(v.name)||/AndrewNeural/i.test(v.name))||voices.find(v=>/Andrew/i.test(v.name)&&!/Multilingual/i.test(v.name))||voices.find(v=>v.lang==='en-US')}
 function speak(text){if(!text||!('speechSynthesis'in window))return;stopAudio();const generation=audioGeneration,u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=state.audioRate;u.voice=andrewVoice();activeUtterance=u;u.onend=()=>{if(generation===audioGeneration)activeUtterance=null};u.onerror=()=>{if(generation===audioGeneration)activeUtterance=null};speechSynthesis.speak(u);toast(`Playing Andrew at ${state.audioRate}×`)}
+function addCurrentToWordbook(){
+  const rec=recordFor(currentWord().id);rec.stars=Math.max(1,rec.stars);rec.status='learning';rec.inWordbook=true;rec.due=rec.due||Date.now();saveProgress();renderWord(false);toast('Added to Wordbook');
+}
+function markCurrentMastered(){rate('easy')}
 function rate(kind){
   const word=currentWord(),rec=recordFor(word.id),now=Date.now();rec.repetitions++;rec.last=now;
   if(kind==='again'){rec.status='learning';rec.inWordbook=true;rec.stars=Math.max(rec.stars,3);rec.due=now+10*60000}
@@ -165,7 +169,7 @@ async function init(){
   blockWritingToolOverlays();
   state.progress=await loadProgress();state.words=await fetch('public/vocabulary.json').then(r=>r.json());const savedWordId=state.progress.__settings?.lastWordId,savedIndex=state.words.findIndex(word=>String(word.id)===String(savedWordId));if(savedIndex>=0)state.current=savedIndex;$('searchInput').placeholder=`Search ${state.words.length.toLocaleString()} words`;populateTestChapters();renderWord();updateStats();syncProgressNow();
   document.querySelectorAll('.nav-item').forEach(b=>b.onclick=()=>{state.query='';$('searchInput').value='';setView(b.dataset.view);if(b.dataset.view==='learn')renderWord()});document.querySelectorAll('[data-rating]').forEach(b=>b.onclick=()=>rate(b.dataset.rating));
-  $('nextButton').onclick=nextWord;$('previousButton').onclick=previousWord;$('randomButton').onclick=()=>{const indexes=studyIndices();state.current=indexes[Math.floor(Math.random()*indexes.length)];renderWord()};
+  $('nextButton').onclick=nextWord;$('previousButton').onclick=previousWord;$('wordbookButton').onclick=addCurrentToWordbook;$('masteredButton').onclick=markCurrentMastered;$('randomButton').onclick=()=>{const indexes=studyIndices();state.current=indexes[Math.floor(Math.random()*indexes.length)];renderWord()};
   $('toggleExamples').onclick=()=>{state.showExampleText=!state.showExampleText;renderWord(false)};
   document.querySelector('[data-speak="word"]').onclick=()=>speakWord(currentWord());$('searchInput').oninput=e=>{state.query=e.target.value.trim();if(state.query){setView('search');renderList()}else if(state.view==='search'){setView('learn')}};$('searchInput').onkeydown=e=>{if(e.key==='Enter'&&state.query){const first=listWords()[0];if(first){e.preventDefault();state.current=state.words.findIndex(w=>w.id===first.id);state.activeChapter=null;state.query='';$('searchInput').value='';setView('learn');renderWord()}}};$('levelFilter').onchange=e=>{state.level=e.target.value;renderList()};$('menuButton').onclick=()=>document.querySelector('.sidebar').classList.toggle('open');
   $('resetButton').onclick=()=>{if(confirm('Reset all stars, reviews, and mastered words?')){state.progress={};saveProgress();renderWord();toast('Learning data reset')}};
@@ -187,10 +191,10 @@ async function init(){
     if(event.key==='Enter'&&event.ctrlKey){
       if(event.repeat)return;
       event.preventDefault();
-      const rec=recordFor(currentWord().id);rec.stars=Math.max(1,rec.stars);rec.status='learning';rec.inWordbook=true;rec.due=rec.due||Date.now();saveProgress();renderWord(false);toast('Added to Wordbook');
+      addCurrentToWordbook();
     }else if(event.key==='Enter'){
       if(event.repeat)return;
-      event.preventDefault();rate('easy');
+      event.preventDefault();markCurrentMastered();
     }
   });
   window.addEventListener('beforeunload',()=>{const blob=new Blob([JSON.stringify(state.progress)],{type:'application/json'});navigator.sendBeacon('/api/progress',blob)});
