@@ -82,3 +82,43 @@ body>iframe,grammarly-extension,grammarly-desktop-integration,ms-editor-squiggle
   #learnView .card-actions button{min-height:38px;padding:7px 5px;font-size:11px}
   #learnView .practice-panel{display:none}
 }
+
+.shortcut-hint{margin:5px 0 0;color:var(--muted);font-size:10px;line-height:1.3;text-align:center;text-decoration:none!important;background:transparent!important}.mobile-shortcuts{display:none}
+@media(max-width:600px){.desktop-shortcuts{display:none}.mobile-shortcuts{display:inline}.learn-shortcut-hint{margin:4px 0}.test-shortcut-hint{flex:0 0 auto;margin:4px 0 0;font-size:9px}}
+
+/* Keep test navigation reachable on phones while examples scroll inside. */
+@media(max-width:600px){
+  #testView.active{display:flex;flex-direction:column;height:calc(100dvh - 52px);padding:3px 12px 8px;overflow:hidden}
+  #testView .test-shell{display:flex;flex-direction:column;flex:1;min-height:0;width:100%;margin:0 auto}
+  #testView .test-top{flex:0 0 auto;margin:0 0 5px;align-items:center}
+  #testView .test-top .eyebrow{margin:0 0 3px;font-size:9px;letter-spacing:1.2px}
+  #testView .test-top h1{font-size:30px;line-height:1;letter-spacing:-1.5px}
+  #testView .test-options{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px;margin:0 0 6px}
+  #testView .test-options select,#testView .test-options button{height:36px;min-width:0;padding:6px 9px;font-size:11px}
+  #testView .mode-counter{font-size:10px;white-space:nowrap}
+  #testView .test-card{display:flex;flex-direction:column;flex:1;min-height:0;padding:10px 11px 8px;border-radius:19px;overflow:hidden}
+  #testView .test-word-row{flex:0 0 auto;grid-template-columns:44px minmax(0,1fr);gap:7px;width:100%}
+  #testView .test-word-row .test-replay{width:44px;height:44px}
+  #testView .test-word-row #testForm{gap:6px}
+  #testView .test-word-row #testForm input,#testView .test-word-row #testForm button{height:44px;padding:7px 9px;font-size:13px}
+  #testView .test-word-tools{flex:0 0 auto;margin:4px 0 5px;min-height:28px}
+  #testView .speed-control button{font-size:8px;padding:2px}
+  #testView .hint-toggle{font-size:10px;gap:5px}
+  #testView .test-star-rating button{font-size:21px}
+  #testView .test-sentence-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;width:100%;margin:0 auto;padding:0 2px;gap:6px;scrollbar-width:thin}
+  #testView .test-sentence-row{padding:9px 10px;border-radius:12px}
+  #testView .test-sentence-row-head>div:first-child>span{height:25px;font-size:9px}
+  #testView .test-sentence-row-head>div:last-child{margin-top:4px}
+  #testView .test-sentence-row-head .speak-button{width:27px;height:27px}
+  #testView .test-example-text{margin:4px 0;padding:6px 8px;font-size:11px}
+  #testView .test-sentence-row form{margin-top:4px;gap:5px}
+  #testView .test-sentence-row form input{padding:7px 8px;font-size:12px}
+  #testView .test-sentence-row form button{padding:6px 9px;font-size:11px}
+  #testView .test-secondary-actions{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 0}
+  #testView .test-secondary-actions button{min-height:34px;padding:6px 4px;font-size:9px;text-align:center}
+  #testView .test-feedback{flex:0 0 auto;max-height:90px;overflow-y:auto;min-height:0;margin:5px 0 0;font-size:11px;line-height:1.3}
+  #testView .answer-review{margin:0;padding:8px 10px;border-radius:11px}
+  #testView .answer-word{font-size:20px}
+  #testView .answer-sense{padding:6px 0 2px;font-size:11px}
+  #testView .test-continue{flex:0 0 auto;width:100%;min-height:38px;margin:5px 0 0;padding:7px 10px;font-size:11px}
+}
