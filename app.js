@@ -1,18 +1,20 @@
 const state = { words: [], current: 0, view: 'learn', query: '', level: 'all', chapterLevel: 'A1', progress: {}, activeChapter: null, testIndex: 0, testMode: 'random', testChapter: '', testHistory: [], testStarted: false, testQueue: [], testPosition: -1, testExampleWords: false, showExampleText: true, audioRate: 1 };
 const $ = id => document.getElementById(id);
 const DAY = 86400000;
+const PROGRESS_KEY = 'lexi-progress';
+const PROGRESS_BACKUP_KEY = 'koko-okok-progress-backup';
 let activeAudio=null,activeAudioUrl=null,activeAudioController=null,activeUtterance=null,audioGeneration=0,testAudioTimer=null;
 
 async function loadProgress(){
-  let local={};try{local=JSON.parse(localStorage.getItem('lexi-progress')||'{}')}catch{}
+  let local={};try{local=JSON.parse(localStorage.getItem(PROGRESS_KEY)||localStorage.getItem(PROGRESS_BACKUP_KEY)||'{}')}catch{}
   let shared={};try{const response=await fetch('/api/progress',{cache:'no-store'});if(response.ok)shared=await response.json()}catch{}
   const merged={...shared};Object.entries(local).forEach(([id,record])=>{const existing=merged[id];if(!existing||(record.last||0)>=(existing.last||0))merged[id]=record});
-  localStorage.setItem('lexi-progress',JSON.stringify(merged));return merged;
+  const saved=JSON.stringify(merged);localStorage.setItem(PROGRESS_KEY,saved);localStorage.setItem(PROGRESS_BACKUP_KEY,saved);return merged;
 }
 function syncProgressNow(){
-  const data=JSON.stringify(state.progress);localStorage.setItem('lexi-progress',data);fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},body:data,keepalive:true}).catch(()=>{});
+  const data=JSON.stringify(state.progress);localStorage.setItem(PROGRESS_KEY,data);localStorage.setItem(PROGRESS_BACKUP_KEY,data);fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},body:data,keepalive:true}).catch(()=>{});
 }
-function saveProgress(){localStorage.setItem('lexi-progress',JSON.stringify(state.progress));clearTimeout(saveProgress.timer);saveProgress.timer=setTimeout(syncProgressNow,220);updateStats()}
+function saveProgress(){const data=JSON.stringify(state.progress);localStorage.setItem(PROGRESS_KEY,data);localStorage.setItem(PROGRESS_BACKUP_KEY,data);clearTimeout(saveProgress.timer);saveProgress.timer=setTimeout(syncProgressNow,220);updateStats()}
 function recordFor(id){ return state.progress[id] || (state.progress[id]={stars:0,status:'new',due:0,repetitions:0,last:0}); }
 function hasSenseStars(record){return Object.values(record.senseStars||{}).some(Boolean)}
 function currentWord(){ return state.words[state.current]; }
@@ -58,9 +60,9 @@ function renderWord(autoPlay=true){
 }
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function cleanHeadword(value){return String(value?.word??value??'').replace(/\d+$/,'').trim()}
-function speakWord(value){return speak(cleanHeadword(value))}
-function andrewVoice(){const voices=speechSynthesis.getVoices();return voices.find(v=>/^Microsoft Andrew Online \(Natural\)/i.test(v.name)||/AndrewNeural/i.test(v.name))||voices.find(v=>/Andrew/i.test(v.name)&&!/Multilingual/i.test(v.name))||voices.find(v=>v.lang==='en-US')}
-function speak(text){if(!text||!('speechSynthesis'in window))return;stopAudio();const generation=audioGeneration,u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=state.audioRate;u.voice=andrewVoice();activeUtterance=u;u.onend=()=>{if(generation===audioGeneration)activeUtterance=null};u.onerror=()=>{if(generation===audioGeneration)activeUtterance=null};speechSynthesis.speak(u);toast(`Playing Andrew at ${state.audioRate}×`)}
+function speakWord(value){return speak(`${cleanHeadword(value)}.`,Math.min(state.audioRate,0.88))}
+function andrewVoice(){const voices=speechSynthesis.getVoices(),american=voices.filter(v=>/^en-US$/i.test(v.lang));return voices.find(v=>/^Microsoft Andrew Online \(Natural\)/i.test(v.name)||/AndrewNeural/i.test(v.name))||voices.find(v=>/Andrew/i.test(v.name)&&!/Multilingual/i.test(v.name))||american.find(v=>/Christopher|Guy|David|Eric|Mark|Roger|Alex|Nathan|Matthew|Male/i.test(v.name))||null}
+function speak(text,rate=state.audioRate){if(!text||!('speechSynthesis'in window))return;stopAudio();const generation=audioGeneration,started=Date.now(),play=()=>{if(generation!==audioGeneration)return;const voice=andrewVoice(),voicesReady=speechSynthesis.getVoices().length>0;if(!voicesReady&&Date.now()-started<1500){setTimeout(play,150);return}const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=rate;if(voice)u.voice=voice;activeUtterance=u;u.onend=()=>{if(generation===audioGeneration)activeUtterance=null};u.onerror=()=>{if(generation===audioGeneration)activeUtterance=null};speechSynthesis.speak(u);toast(`Playing ${voice?.name||'American English'} at ${rate}×`)};play()}
 function addCurrentToWordbook(){
   const rec=recordFor(currentWord().id);rec.stars=Math.max(1,rec.stars);rec.status='learning';rec.inWordbook=true;rec.due=rec.due||Date.now();saveProgress();renderWord(false);toast('Added to Wordbook');
 }
@@ -76,7 +78,7 @@ function rate(kind){
 function nextWord(){const indexes=studyIndices(),place=indexes.indexOf(state.current);if(state.activeChapter!==null&&place===indexes.length-1){const chapters=orderedChapterKeys(),chapterPosition=chapters.indexOf(state.activeChapter),nextChapter=chapters[chapterPosition+1];if(!nextChapter){toast('Course complete — you finished the final chapter.');return}const [level,category]=nextChapter.split('|||');if(!window.confirm(`Chapter complete. Continue to the next chapter: ${level} · ${category}?`))return;state.activeChapter=nextChapter;const nextIndexes=studyIndices(),unseen=nextIndexes.find(i=>state.progress[state.words[i].id]?.status!=='mastered');state.current=unseen??nextIndexes[0];renderWord();toast(`Next chapter: ${level} · ${category}`);return}state.current=indexes[(place+1+indexes.length)%indexes.length];renderWord()}
 function previousWord(){const indexes=studyIndices(),place=indexes.indexOf(state.current);state.current=indexes[(place-1+indexes.length)%indexes.length];renderWord()}
 function testAudioText(word){const headword=cleanHeadword(word),example=word.senses.find(s=>s.example)?.example||'';return example?`${headword}. ${example}`:headword}
-function playTestAudio(word){if(!('speechSynthesis'in window))return;stopAudio();const generation=audioGeneration,exampleIndex=word.senses.findIndex(s=>s.example),items=[cleanHeadword(word)];if(exampleIndex>=0)items.push(word.senses[exampleIndex].example);const playAt=index=>{if(index>=items.length||generation!==audioGeneration)return;const u=new SpeechSynthesisUtterance(items[index]);u.lang='en-US';u.rate=state.audioRate;u.voice=andrewVoice();activeUtterance=u;u.onend=()=>{if(generation!==audioGeneration)return;activeUtterance=null;playAt(index+1)};u.onerror=()=>{if(generation!==audioGeneration)return;activeUtterance=null;playAt(index+1)};speechSynthesis.speak(u)};playAt(0);toast(`Playing Andrew at ${state.audioRate}×`)}
+function playTestAudio(word){if(!('speechSynthesis'in window))return;stopAudio();const generation=audioGeneration,exampleIndex=word.senses.findIndex(s=>s.example),items=[`${cleanHeadword(word)}.`];if(exampleIndex>=0)items.push(word.senses[exampleIndex].example);const started=Date.now(),begin=()=>{if(generation!==audioGeneration)return;const voice=andrewVoice(),voicesReady=speechSynthesis.getVoices().length>0;if(!voicesReady&&Date.now()-started<1500){setTimeout(begin,150);return}const playAt=index=>{if(index>=items.length||generation!==audioGeneration)return;const u=new SpeechSynthesisUtterance(items[index]);u.lang='en-US';u.rate=index===0?Math.min(state.audioRate,0.88):state.audioRate;if(voice)u.voice=voice;activeUtterance=u;u.onend=()=>{if(generation!==audioGeneration)return;activeUtterance=null;playAt(index+1)};u.onerror=()=>{if(generation!==audioGeneration)return;activeUtterance=null;playAt(index+1)};speechSynthesis.speak(u)};playAt(0);toast(`Playing ${voice?.name||'American English'} at ${state.audioRate}×`)};begin()}
 function normalizeSentence(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
 function testPool(){let pool=state.words.map((w,i)=>state.testMode==='chapter'&&state.testChapter&&chapterKey(w)!==state.testChapter?-1:i).filter(i=>i>=0);const learning=pool.filter(i=>state.progress[state.words[i].id]?.status!=='mastered');return learning.length?learning:pool}
 function buildTestSession(){
