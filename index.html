@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#f5f5f7" />
   <title>koko.okok — Make It OK.</title>
-  <link rel="stylesheet" href="styles.css?v=20260717-mobile-compact" />
+  <link rel="stylesheet" href="styles.css?v=20260717-mobile-test-shortcuts" />
 </head>
 <body data-ms-editor="false" data-gramm="false" data-gramm_editor="false" spellcheck="false">
   <div class="app-shell">
@@ -49,6 +49,7 @@
               <div class="example-controls"><span>Example sentences</span><button id="toggleExamples" class="text-button" type="button">Hide all text</button></div>
               <div id="senses"></div>
             </div>
+            <p class="shortcut-hint learn-shortcut-hint"><span class="desktop-shortcuts">Enter: Mastered · Ctrl+Enter: Wordbook · ← / →: Navigate</span><span class="mobile-shortcuts">Use the buttons below to save or change words.</span></p>
             <div class="card-actions">
               <button id="previousButton" class="secondary-button">← Previous</button>
               <button id="wordbookButton" class="secondary-button mobile-study-button">★ Wordbook</button>
@@ -82,6 +83,7 @@
             <div class="test-word-row"><button id="testReplay" class="test-replay speak-button" aria-label="Replay word and example"></button><form id="testForm"><input id="testAnswer" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type the word" aria-label="Type the word you heard" /><button class="primary-button" type="submit">Check</button></form></div>
             <div class="test-word-tools"><div class="speed-control" aria-label="Playback speed"><button data-audio-rate="0.5" type="button">0.5×</button><button data-audio-rate="0.75" type="button">0.75×</button><button data-audio-rate="1" class="active" type="button">1×</button></div><div id="testStars" class="star-rating test-star-rating" aria-label="Choose how unfamiliar this word is"></div><label class="hint-toggle" aria-label="Show English hint"><input id="testHintToggle" type="checkbox" /><span class="hint-label" aria-hidden="true"></span></label></div>
             <div id="testSentenceList" class="test-sentence-list"></div>
+            <p class="shortcut-hint test-shortcut-hint"><span class="desktop-shortcuts">Enter: Check · ← / →: Previous / Next</span><span class="mobile-shortcuts">Use the buttons below to move or reveal the answer.</span></p>
             <div class="test-secondary-actions"><button id="testPrevious" class="test-unknown" type="button">← Previous word</button><button id="testUnknown" class="test-unknown" type="button">I don’t know — show the word</button></div>
             <p id="testFeedback" class="test-feedback" aria-live="polite"></p>
             <button id="testContinue" class="primary-button test-continue" type="button" hidden>Next word →</button>
