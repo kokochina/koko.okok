@@ -182,7 +182,7 @@ function updateStats(){
 }
 async function init(){
   blockWritingToolOverlays();
-  state.progress=await loadProgress();state.words=await fetch('public/vocabulary.json?v=20260717-words3000').then(r=>r.json());const savedWordId=state.progress.__settings?.lastWordId,savedIndex=state.words.findIndex(word=>String(word.id)===String(savedWordId));if(savedIndex>=0)state.current=savedIndex;$('searchInput').placeholder=`Search ${state.words.length.toLocaleString()} words`;populateTestChapters();renderWord();updateStats();syncProgressNow();
+  state.progress=await loadProgress();state.words=await fetch('public/vocabulary.json?v=20260718-spelling-audit').then(r=>r.json());const savedWordId=state.progress.__settings?.lastWordId,savedIndex=state.words.findIndex(word=>String(word.id)===String(savedWordId));if(savedIndex>=0)state.current=savedIndex;$('searchInput').placeholder=`Search ${state.words.length.toLocaleString()} words`;populateTestChapters();renderWord();updateStats();syncProgressNow();
   document.querySelectorAll('.nav-item').forEach(b=>b.onclick=()=>{state.query='';$('searchInput').value='';setView(b.dataset.view);if(b.dataset.view==='learn')renderWord()});document.querySelectorAll('[data-rating]').forEach(b=>b.onclick=()=>rate(b.dataset.rating));
   $('nextButton').onclick=nextWord;$('previousButton').onclick=previousWord;$('wordbookButton').onclick=addCurrentToWordbook;$('masteredButton').onclick=markCurrentMastered;$('randomButton').onclick=()=>{const indexes=studyIndices();state.current=indexes[Math.floor(Math.random()*indexes.length)];renderWord()};
   $('toggleExamples').onclick=()=>{state.showExampleText=!state.showExampleText;renderWord(false)};
