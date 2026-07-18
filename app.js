@@ -3,7 +3,9 @@ const $ = id => document.getElementById(id);
 const DAY = 86400000;
 const PROGRESS_KEY = 'lexi-progress';
 const PROGRESS_BACKUP_KEY = 'koko-okok-progress-backup';
+const PHONETIC_CACHE_KEY = 'koko-okok-ipa-cache-v1';
 let activeAudio=null,activeAudioUrl=null,activeAudioController=null,activeUtterance=null,audioGeneration=0,testAudioTimer=null;
+let phoneticCache={};try{phoneticCache=JSON.parse(localStorage.getItem(PHONETIC_CACHE_KEY)||'{}')}catch{}
 const audioChannel='BroadcastChannel'in window?new BroadcastChannel('koko-okok-audio-control'):null;
 
 async function loadProgress(){
@@ -57,7 +59,7 @@ function handleTextSelection(){
 function renderWord(autoPlay=true){
   stopAudio();const word=currentWord(); if(!word)return;
   const rec=recordFor(word.id);
-  $('wordText').textContent=cleanHeadword(word); $('posText').textContent=word.grammar||`${word.pos} ${word.level}`; $('levelPill').textContent=word.level; $('categoryText').textContent=word.category;
+  $('wordText').textContent=cleanHeadword(word); $('posText').textContent=word.grammar||`${word.pos} ${word.level}`;$('phoneticText').textContent='';renderPhonetics(word); $('levelPill').textContent=word.level; $('categoryText').textContent=word.category;
   const indexes=studyIndices(),position=Math.max(0,indexes.indexOf(state.current));$('studyCounter').textContent=state.activeChapter?`Chapter progress · ${position+1} / ${indexes.length}`:`All words · ${position+1} / ${indexes.length}`;
   renderStarRating('learnStars',word);
   $('toggleExamples').textContent=state.showExampleText?'Hide all text':'Show all text';
@@ -68,6 +70,8 @@ function renderWord(autoPlay=true){
 }
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function cleanHeadword(value){return String(value?.word??value??'').replace(/\d+$/,'').trim()}
+function formatIpa(value){const text=String(value||'').trim();if(!text)return '';return text.startsWith('/')||text.startsWith('[')?text:`/${text}/`}
+async function renderPhonetics(word){const target=$('phoneticText'),headword=cleanHeadword(word),key=headword.toLowerCase();target.textContent=' · UK … · US …';let result=phoneticCache[key];if(!result){try{const response=await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(headword)}`);if(!response.ok)throw new Error('Not found');const entries=await response.json(),phonetics=entries.flatMap(entry=>entry.phonetics||[]).filter(item=>item?.text),generic=formatIpa(entries.find(entry=>entry.phonetic)?.phonetic||phonetics[0]?.text),regionText=region=>formatIpa(phonetics.find(item=>new RegExp(`(?:-|_|\\/)${region}(?:\\.|-|_|\\/)`,'i').test(item.audio||item.sourceUrl||''))?.text);result={uk:regionText('uk')||regionText('gb')||generic,us:regionText('us')||generic};if(result.uk||result.us){phoneticCache[key]=result;try{localStorage.setItem(PHONETIC_CACHE_KEY,JSON.stringify(phoneticCache))}catch{}}}catch{result={uk:'',us:''}}}if(currentWord()?.id!==word.id)return;target.textContent=result.uk||result.us?` · UK ${result.uk||'—'} · US ${result.us||'—'}`:' · IPA unavailable'}
 function speakWord(value){return speak(`${cleanHeadword(value)}.`,Math.min(state.audioRate,0.88))}
 function isMobileDevice(){return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&window.innerWidth<900)}
 function preferredVoice(){const voices=speechSynthesis.getVoices(),american=voices.filter(v=>/^en-US$/i.test(v.lang)),english=voices.filter(v=>/^en(?:-|_)/i.test(v.lang));if(isMobileDevice()){return american.find(v=>/^Samantha$/i.test(v.name))||american.find(v=>/Google US English.*Female|Google.*US.*Female/i.test(v.name))||american.find(v=>/Google US English/i.test(v.name))||american.find(v=>/Jenny/i.test(v.name))||american.find(v=>/Aria/i.test(v.name))||american.find(v=>/Ava|Emma|Michelle|Zira|Susan|Victoria|Female/i.test(v.name))||american[0]||english.find(v=>/Samantha|Google.*Female|Jenny|Aria|Ava|Emma|Michelle|Zira|Susan|Victoria|Female/i.test(v.name))||english[0]||null}return voices.find(v=>/^Microsoft Andrew Online \(Natural\)/i.test(v.name)||/AndrewNeural/i.test(v.name))||voices.find(v=>/Andrew/i.test(v.name)&&!/Multilingual/i.test(v.name))||american.find(v=>/Christopher|Guy|David|Eric|Mark|Roger|Alex|Nathan|Matthew|Aaron|Fred|Ralph|Daniel|Male/i.test(v.name))||american[0]||english[0]||null}
