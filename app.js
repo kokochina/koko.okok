@@ -79,6 +79,9 @@ function speak(text,rate=state.audioRate){if(!text||!('speechSynthesis'in window
 function addCurrentToWordbook(){
   const rec=recordFor(currentWord().id);rec.stars=Math.max(1,rec.stars);rec.status='learning';rec.inWordbook=true;rec.due=rec.due||Date.now();saveProgress();renderWord(false);toast('Added to Wordbook');
 }
+function addCurrentWordbookStar(){
+  const rec=recordFor(currentWord().id),next=Math.min(3,(rec.stars||0)+1);rec.stars=next;rec.status='learning';rec.inWordbook=true;rec.due=rec.due||Date.now();saveProgress();renderWord(false);toast(`Unfamiliarity: ${'★'.repeat(next)}${'☆'.repeat(3-next)}`);
+}
 function markCurrentMastered(){rate('easy')}
 function rate(kind){
   const word=currentWord(),rec=recordFor(word.id),now=Date.now();rec.repetitions++;rec.last=now;
@@ -207,7 +210,7 @@ async function init(){
     if(event.key==='Enter'&&event.ctrlKey){
       if(event.repeat)return;
       event.preventDefault();
-      addCurrentToWordbook();
+      addCurrentWordbookStar();
     }else if(event.key==='Enter'){
       if(event.repeat)return;
       event.preventDefault();markCurrentMastered();
