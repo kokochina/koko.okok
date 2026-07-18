@@ -38,7 +38,7 @@ body>iframe,grammarly-extension,grammarly-desktop-integration,ms-editor-squiggle
 #learnView.active{display:flex;flex-direction:column;padding-top:0;padding-bottom:54px}#learnView .hero-row{flex:0 0 auto;width:100%;margin-top:0}#learnView .study-layout{flex:1;min-height:0;height:auto;width:100%}.word-card .card-actions{margin-top:0;padding-top:14px;border-top:1px solid var(--line);background:var(--panel);position:relative;z-index:2}
 @media(max-width:900px){#learnView.active{padding-bottom:30px}#learnView .study-layout{overflow-y:auto}.word-card{height:min(680px,calc(100vh - 190px))}}
 .mobile-study-button{display:none}.mastered-action{color:var(--green)}
-@media(max-width:600px){.card-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px}.card-actions .mobile-study-button{display:block}.card-actions #previousButton{grid-column:1}.card-actions #nextButton{grid-column:2;grid-row:auto!important}.card-actions #randomButton{display:none}.card-actions button{min-height:44px;padding:10px 8px}}
+@media(max-width:600px){.card-actions{display:grid!important;grid-template-columns:1fr 1fr!important;grid-template-areas:"mastered wordbook" "previous next";gap:8px}.card-actions .mobile-study-button{display:block}.card-actions #masteredButton{grid-area:mastered}.card-actions #wordbookButton{grid-area:wordbook}.card-actions #previousButton{grid-area:previous}.card-actions #nextButton{grid-area:next;grid-row:auto!important}.card-actions #randomButton{display:none}.card-actions button{min-height:44px;padding:10px 8px}}
 
 /* Compact, thumb-friendly study layout for phones. */
 @media(max-width:600px){
